@@ -14,7 +14,7 @@ CHANGES FROM ABOVE:
 CHANGES MADE BY: 
     Ernest Quant
 
-DRONE 360-MOVEMENT & Collection
+DRONE 360-EXPLORATION
 --------------------------------------------------------------------------------------------------------------
 DESCRIPTION:
     Added continuous collection of training images by allowing the drone to explore a linear path from origin 
@@ -34,6 +34,8 @@ import math
 
 client = airsim.MultirotorClient()
 client.confirmConnection()
+client.enableApiControl(True)
+client.armDisarm(True)
 
 # CHANGE TO YOUR DESIRED DIRECTORY
 tmp_dir = r"C:\Users\Ernest\Pictures\Collision_Images"
