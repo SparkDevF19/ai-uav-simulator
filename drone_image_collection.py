@@ -48,27 +48,24 @@ except OSError:
 
 
 imagequeue = []
-QUEUESIZE = 200       # NUMBER OF IMAGES KEPT RIGHT BEFORE AND UP TO A COLLISION
-imageBatch = 0      # USED TO INCREMENT FILE NUMBERS AFTER COLLISION
-#endNum = 100       # IF YOU WANT TO TERMINATE AT A CERTAIN NUMBER OF IMAGES
+QUEUESIZE = 200 # NUMBER OF IMAGES KEPT RIGHT BEFORE AND UP TO A COLLISION
+imageBatch = 0  # USED TO INCREMENT FILE NUMBERS AFTER COLLISION
+#endNum = 100   # IF YOU WANT TO TERMINATE AT A CERTAIN NUMBER OF IMAGES
 
+degrees = list(range(0,360,5)) #from 0 to 360 in intervals of 5
+travel_distance = 50 
+airsim.wait_key('Press any key to take off and start 360-exploration starting from Origin (height = 20m) at 15 m/s')
 
 while True:
 
-    #INSERTED HERE
-    #Automates the position and data collection
-    airsim.wait_key('Press any key to start 360-exploration starting from Origin at 5 m/s')
-    degrees = list(range(0,360,5)) #from 0 to 
-    travel_distance = 20 #FIX (More appropiate travel distance)
     for degree in degrees:
+        #Automates the position and data collection
+        client.takeoffAsync().join()
         xcoor = travel_distance * math.cos(math.radians(degree))
         ycoor = travel_distance * math.sin(math.radians(degree))
-        #Assuming (x,y,z,v)
-        client.moveToPositionAsync(xcoor, ycoor, 5  , 5).join()
+        client.moveToPositionAsync(xcoor, ycoor, -20  , 15)
         client.hoverAsync().join()
-
-    #END OF INSERTION
-
+        
         while True:
 
             responses = client.simGetImages([airsim.ImageRequest(1,airsim.ImageType.Scene)])
@@ -100,7 +97,5 @@ while True:
 
         imageBatch += QUEUESIZE
         client.reset()
-        time.sleep(1)
-
 
 client.reset()
