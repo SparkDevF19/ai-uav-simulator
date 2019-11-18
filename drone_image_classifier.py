@@ -142,17 +142,17 @@ def main():
 
     #appends safe & unsafe images to the appropriate lists to later use as labels
     if (image_Type):
-        for file in os.listdir(SAFE_IMG_PNG):
+        for file in os.listdir(DATADIR+SAFE_IMG_PNG):
                 frame = loadgray(DATADIR + SAFE_IMG_PNG + file)
                 imageSafeList.append(file)
-        for file in os.listdir(UNSAFE_IMG_PNG):
+        for file in os.listdir(DATADIR+UNSAFE_IMG_PNG):
                 frame = loadgray(DATADIR + UNSAFE_IMG_PNG + file)
                 imageUnsafeList.append(file)
     elif(not(image_Type)):
-        for file in os.listdir(SAFE_IMG_PFM):
+        for file in os.listdir(DATADIR+SAFE_IMG_PFM):
             frame = loadgray(DATADIR + SAFE_IMG_PFM+ file)
             imageSafeList.append(file)
-        for file in os.listdir(UNSAFE_IMG_PFM):
+        for file in os.listdir(DATADIR + UNSAFE_IMG_PFM):
             frame = loadgray(DATADIR + UNSAFE_IMG_PFM + file)
             imageUnsafeList.append(file)
 
