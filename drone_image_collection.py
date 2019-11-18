@@ -33,7 +33,7 @@ client.enableApiControl(True)
 client.armDisarm(True)
 
 # CHANGE TO YOUR DESIRED DIRECTORY
-tmp_dir = r"C:\Users\Ernest\Pictures\Collision_Images"
+tmp_dir = r"D:\OneDrive\Documents\FIUCS\SparkDev\ai-uav-simulator\Collection"
 
 try:
     os.makedirs(tmp_dir)
@@ -48,7 +48,7 @@ imageBatch = 0  # USED TO INCREMENT FILE NUMBERS AFTER COLLISION
 #endNum = 100   # IF YOU WANT TO TERMINATE AT A CERTAIN NUMBER OF IMAGES
 
 degrees = list(range(0,360,5)) #from 0 to 360 in intervals of 5
-velocityMultiplayer = 10
+velocityMagnitude = 5
 airsim.wait_key('Press any key to take off and start 360-exploration starting from Origin (height = 20m) at 15 m/s')
 
 while True:
@@ -64,13 +64,17 @@ while True:
         print("Ready!")
         timeout = 15   #in seconds
         timeout_start = time.time()
-        xcoor = velocityMultiplayer * math.cos(math.radians(degree))
-        ycoor = velocityMultiplayer * math.sin(math.radians(degree))
-        client.moveByVelocityAsync(xcoor, ycoor, 0, 20)
+
+        vx0 =  math.cos(math.radians(degree))
+        vy0 = math.sin(math.radians(degree))
+        vx = velocityMagnitude * vx0
+        vy = velocityMagnitude * vy0
+
+        client.moveByVelocityAsync(vx, vy, 0, 20)
         
         while time.time() < timeout_start + timeout:
 
-            responses = client.simGetImages([airsim.ImageRequest(1,airsim.ImageType.Scene)])
+            responses = client.simGetImages([airsim.ImageRequest(0,airsim.ImageType.Scene)])
 
             imagequeue.append(responses[0].image_data_uint8)
 
@@ -78,7 +82,7 @@ while True:
             if len(imagequeue) == QUEUESIZE:
                 for i in range(QUEUESIZE):
                     filename = os.path.join(tmp_dir, str(i + imageBatch))
-                    airsim.write_file(os.path.normpath(filename + '.png'),imagequeue[i])
+                    airsim.write_file(os.path.normpath(filename + '.pmf'),imagequeue[i]) #PMF
                 imagequeue.pop(0)
 
             collision_info = client.simGetCollisionInfo()
@@ -110,8 +114,8 @@ client.reset()
 --------------------------------------------------------------------------------------------------------------    
 
 INSPIRED FROM:
-    Availability: https://github.com/simondlevy/AirSimTensorFlow/blob/master/image_collection.py
     Title: image_collection.py
+    Availability: https://github.com/simondlevy/AirSimTensorFlow/blob/master/image_collection.py
     Authors: Jack Baird, Alex Cantrell, Keith Denning, Rajwol Joshi, Simon D. Levy, Will McMurtry, Jacob Rosen    
     
 --------------------------------------------------------------------------------------------------------------
