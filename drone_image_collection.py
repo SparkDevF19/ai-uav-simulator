@@ -17,13 +17,14 @@ MADE BY:
     Ernest J. Quant
     Orson Meyreles
     John Quitto-Graham  
-    Catherine Angelini is helping
+    Catherine Angelini
 --------------------------------------------------------------------------------------------------------------
 
 """
 import setup_path
 import airsim
 import pprint
+import shutil
 import time
 import os
 import math
@@ -34,22 +35,34 @@ client.enableApiControl(True)
 client.armDisarm(True)
 
 # CHANGE TO YOUR DESIRED DIRECTORY
-tmp_dir = r"D:\OneDrive\Documents\FIUCS\SparkDev\ai-uav-simulator\Collection"
+safe_dir = r"D:\OneDrive\Documents\FIUCS\SparkDev\ai-uav-simulator\Safe_Collection"
+unsafe_dir = r"D:\OneDrive\Documents\FIUCS\SparkDev\ai-uav-simulator\Unsafe_Collection"
 
 try:
-    os.makedirs(tmp_dir)
+    os.makedirs(safe_dir)
 except OSError:
-    if not os.path.isdir(tmp_dir):
+    if not os.path.isdir(safe_dir):
         raise
 
 
 imagequeue = []
 QUEUESIZE = 200 # NUMBER OF IMAGES KEPT RIGHT BEFORE AND UP TO A COLLISION
+isPFM = False
+isPNG = False
 imageBatch = 0  # USED TO INCREMENT FILE NUMBERS AFTER COLLISION
 #endNum = 100   # IF YOU WANT TO TERMINATE AT A CERTAIN NUMBER OF IMAGES
 
 degrees = list(range(0,360,5)) #from 0 to 360 in intervals of 5
 velocityMagnitude = 5
+
+yah = input("T for PFM, F for PNG: ").lower()
+if yah == "t":
+    isPFM = True
+    fileExt = "pfm"
+else:
+    isPNG = True
+    fileExt = "png"
+
 airsim.wait_key('Press any key to take off and start 360-exploration starting from Origin (height = 20m) at 15 m/s')
 
 while True:
@@ -75,15 +88,21 @@ while True:
         
         while time.time() < timeout_start + timeout:
 
-            responses = client.simGetImages([airsim.ImageRequest(0,airsim.ImageType.Scene)])
-
-            imagequeue.append(responses[0].image_data_uint8)
+            if isPNG:
+                responses = client.simGetImages([airsim.ImageRequest(0,airsim.ImageType.Scene)])
+                imagequeue.append(responses[0].image_data_uint8)
+            elif isPFM:
+                responses = client.simGetImages([airsim.ImageRequest(0,airsim.ImageType.DepthVis,True,False)])
+                imagequeue.append(airsim.get_pfm_array(responses[0]))
 
             # KEEPS THE IMAGE QUEUE POPULATED WITH THE MOST RECENT IMAGES
             if len(imagequeue) == QUEUESIZE:
                 for i in range(QUEUESIZE):
-                    filename = os.path.join(tmp_dir, str(i + imageBatch))
-                    airsim.write_file(os.path.normpath(filename + '.pmf'),imagequeue[i]) #PMF
+                    filename = os.path.join(safe_dir, str(i + imageBatch))
+                    if isPNG:
+                        airsim.write_file(os.path.normpath(filename + '.png'),imagequeue[i])
+                    elif isPFM:
+                        airsim.write_pfm(os.path.normpath(filename + '.pfm'),imagequeue[i])
                 imagequeue.pop(0)
 
             collision_info = client.simGetCollisionInfo()
@@ -94,6 +113,9 @@ while True:
                     pprint.pformat(collision_info.normal), 
                     pprint.pformat(collision_info.impact_point), 
                     collision_info.penetration_depth, collision_info.object_name, collision_info.object_id))
+                
+                for i in range((imageBatch+QUEUESIZE-15),imageBatch+QUEUESIZE):
+                    shutil.move(safe_dir + "\{}.{}".format(i,fileExt),unsafe_dir)
                 break
 
         print("Disarming...")
@@ -121,4 +143,3 @@ INSPIRED FROM:
     
 --------------------------------------------------------------------------------------------------------------
 '''
-
