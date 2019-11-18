@@ -18,6 +18,7 @@ MADE BY:
     Orson Meyreles
     John Quitto-Graham  
     Catherine Angelini
+    Carlos Valdes
 --------------------------------------------------------------------------------------------------------------
 
 """
@@ -35,13 +36,24 @@ client.enableApiControl(True)
 client.armDisarm(True)
 
 # CHANGE TO YOUR DESIRED DIRECTORY
-safe_dir = r"D:\OneDrive\Documents\FIUCS\SparkDev\ai-uav-simulator\Safe_Collection"
-unsafe_dir = r"D:\OneDrive\Documents\FIUCS\SparkDev\ai-uav-simulator\Unsafe_Collection"
+safe_dirPFM = "D:\\Airsim_SafePFM"
+unsafe_dirPFM = "D:\\Airsim_UnsafePFM"
+safe_dirPNG = "D:\\Airsim_SafePNG"
+unsafe_dirPNG = "D:\\Airsim_UnsafePNG"
 
 try:
-    os.makedirs(safe_dir)
+    os.makedirs(safe_dirPFM)
+    os.makedirs(safe_dirPNG)
+    os.makedirs(unsafe_dirPFM)
+    os.makedirs(unsafe_dirPNG)
 except OSError:
-    if not os.path.isdir(safe_dir):
+    if not os.path.isdir(safe_dirPFM):
+        raise
+    if not os.path.isdir(safe_dirPNG):
+        raise
+    if not os.path.isdir(unsafe_dirPFM):
+        raise
+    if not os.path.isdir(unsafe_dirPNG):
         raise
 
 
@@ -87,7 +99,7 @@ while True:
         client.moveByVelocityAsync(vx, vy, 0, 20)
         
         while time.time() < timeout_start + timeout:
-
+            
             if isPNG:
                 responses = client.simGetImages([airsim.ImageRequest(0,airsim.ImageType.Scene)])
                 imagequeue.append(responses[0].image_data_uint8)
@@ -98,10 +110,12 @@ while True:
             # KEEPS THE IMAGE QUEUE POPULATED WITH THE MOST RECENT IMAGES
             if len(imagequeue) == QUEUESIZE:
                 for i in range(QUEUESIZE):
-                    filename = os.path.join(safe_dir, str(i + imageBatch))
+                    # SAVE TO CORRECT SAFE DIRECTORY BASED ON PFM/PNG
                     if isPNG:
+                        filename = os.path.join(safe_dirPNG, str(i + imageBatch))
                         airsim.write_file(os.path.normpath(filename + '.png'),imagequeue[i])
                     elif isPFM:
+                        filename = os.path.join(safe_dirPFM, str(i + imageBatch))
                         airsim.write_pfm(os.path.normpath(filename + '.pfm'),imagequeue[i])
                 imagequeue.pop(0)
 
@@ -113,9 +127,14 @@ while True:
                     pprint.pformat(collision_info.normal), 
                     pprint.pformat(collision_info.impact_point), 
                     collision_info.penetration_depth, collision_info.object_name, collision_info.object_id))
-                
+
+                # ONCE COLLISION OCCURS MOVE THE LAST 15 IMAGES TO THE CORRECT UNSAFE DIRECTORY
                 for i in range((imageBatch+QUEUESIZE-15),imageBatch+QUEUESIZE):
-                    shutil.move(safe_dir + "\{}.{}".format(i,fileExt),unsafe_dir)
+                   # SAVE TO CORRECT UNSAFE DIRECTORY BASED ON PFM/PNG
+                    if isPNG:
+                        shutil.move(safe_dirPNG + "\\{}.{}".format(i,fileExt),unsafe_dirPNG)
+                    elif isPFM:
+                        shutil.move(safe_dirPFM + "\\{}.{}".format(i,fileExt),unsafe_dirPFM)
                 break
 
         print("Disarming...")
