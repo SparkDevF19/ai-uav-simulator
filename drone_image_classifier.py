@@ -100,3 +100,92 @@ def main():
 
     pickle_in = open("y.pickle","rb")
     y = pickle.load(pickle_in)'''
+
+    def CNN_trainer(IMAGE):
+        pickle_in = open("X.pickle","rb")
+    X = pickle.load(pickle_in)
+
+    pickle_in = open("y.pickle","rb")
+    y = pickle.load(pickle_in)
+
+    X = X/255.0 #normalize
+
+    dense_layers = [0]
+    layer_sizes = [64]
+    conv_layers = [1]
+
+    for dense_layer in dense_layers:
+    for layer_size in layer_sizes:
+        for conv_layer in conv_layers:
+            NAME = "{}-conv-{}-nodes-{}-dense-{}".format(conv_layer, layer_size, dense_layer, int(time.time()))
+            print(NAME)
+            model = Sequential() #feed-forward network
+            model.add(Conv2D(layer_size, (3, 3), input_shape=X.shape[1:]))
+            model.add(Activation('relu'))
+            model.add(MaxPooling2D(pool_size=(2, 2)))
+
+            for l in range(conv_layer-1):
+                model.add(Conv2D(layer_size, (3, 3)))
+                model.add(Activation('relu'))
+                model.add(MaxPooling2D(pool_size=(2, 2)))
+
+            model.add(Flatten())
+
+            for _ in range(dense_layer):
+                model.add(Dense(layer_size))
+                model.add(Activation('relu'))
+
+            model.add(Dense(1))
+            model.add(Activation('sigmoid'))
+
+            tensorboard = TensorBoard(log_dir="logs/{}".format(NAME))
+
+            model.compile(loss='binary_crossentropy',
+                            optimizer='adam',
+                            metrics=['accuracy'],
+                            )
+
+            model.fit(X, y,
+                        batch_size=32,
+                        epochs=10,
+                        validation_split=0.1,
+                        callbacks=[tensorboard])
+
+    model.save('CNN_tester.model')
+
+def prepare(IMAGEDIR):
+    img_ar = cv2.imread(IMAGEDIR, cv2.IMREAD_GRAYSCALE)
+    retAr = cv2.resize(img_ar, (28, 28))
+    return retAr.reshape(-1, 28, 28, 1)
+
+def predictor(IMAGEDIR):
+    retPredict = model.predict([prepare(IMAGEDIR)])
+    return (SAFE_CATS[int(retPredict[0][0])])
+
+def main():
+    #store safe images into a list
+    imageSafeList = []
+    for file in os.listdir(SAFE_IMG):
+        if file.endswith(".png") or file.endswith(".pfm"):
+            frame = loadgray(IMGDIR + SAFE_IMG+ file)
+            imageSafeList.append(file)
+
+    #store unsafe images into a list
+    imageUnsafeList = []
+    for file in os.listdir(UNSAFE_IMG):
+        if file.endswith(".png") or file.endswith(".pfm"):
+            frame = loadgray(IMGDIR + UNSAFE_IMG + file)
+            imageUnsafeList.append(file)
+
+    #final list that stores the images
+    images = imageSafeList.append(imageUnsafeList)
+
+    labels = []
+    for i in range(len(imageSafeList)):
+        labels.append("safe")
+    for u in range(len(imageUnsafeList)):
+        labels.append("unsafe")
+
+
+# Where we'll store weights and biases
+PARAMFILE = 'params.pkl'
