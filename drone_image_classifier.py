@@ -1,3 +1,6 @@
+''' This version of the code is only a test from a dataset saver using python's pickle library 
+from: https://pythonprogramming.net/neural-networks-machine-learning-tutorial/'''
+
 import numpy as np
 import matplotlib.pyplot as plt
 import os
