@@ -16,15 +16,8 @@ from tqdm import tqdm
 #Directory variables
 DATADIR = "D:\\" # The directory to SAFE and UNSAFE PFM/PNG images
 STATES_PNG = ["Airsim_SafePNG", "Airsim_UnsafePNG"] #Sub-directories for png files
-STATES_PFM = ["Airsim_SafePFM", "Airsim_UnsafePFM"] #Sub-directories for pfm files
-SAFE_IMG_PNG = STATES_PNG[0]
-SAFE_IMG_PFM = STATES_PFM[0] 
+SAFE_IMG_PNG = STATES_PNG[0] 
 UNSAFE_IMG_PNG = STATES_PNG[1]
-UNSAFE_IMG_PFM = STATES_PFM[1]
-
-#Check if we are taking in a png or a pfm file
-def image_Type(file):
-    return file.endswith(".png")
 
 
 #function to convert to array for our visulization function
@@ -40,17 +33,8 @@ def dataToAR():
             break  # we just want one for now so break
         break  #...and one more!
 
-        #Same as above, but for PMF
-    for state in STATES_PFM:
-        path_PFM = os.path.join(DATADIR, state)
-
-        for img in os.listdir(path_PFM):
-            img_ArrayPFM= cv2.imread(os.path.join(path_PFM, img) ,cv2.IMREAD_GRAYSCALE)
-            break
-        break
-
-    ImgAttributes(img_ArrayPNG)
-    ImgAttributes(img_ArrayPFM)
+    
+        ImgAttributes(img_ArrayPNG)
 
 #Helper function to help us visualize image attributes
 def ImgAttributes(image_array):
@@ -144,20 +128,14 @@ def main():
     imageUnsafeList = []
 
     #appends safe & unsafe images to the appropriate lists to later use as labels
-    if (image_Type):
-        for file in os.listdir(DATADIR + SAFE_IMG_PNG):
-                frame = cv2.imread(DATADIR + SAFE_IMG_PNG + file)
-                imageSafeList.append(frame)
-        for file in os.listdir(DATADIR + UNSAFE_IMG_PNG):
-                frame = cv2.imread(DATADIR + UNSAFE_IMG_PNG + file)
-                imageUnsafeList.append(frame)
-    elif(not(image_Type)):
-        for file in os.listdir(DATADIR + SAFE_IMG_PFM):
-            frame = cv2.imread(DATADIR + SAFE_IMG_PFM+ file)
-            imageSafeList.append(frame)
-        for file in os.listdir(DATADIR + UNSAFE_IMG_PFM):
-            frame = cv2.imread(DATADIR + UNSAFE_IMG_PFM + file)
-            imageUnsafeList.append(frame)
+
+    for file in os.listdir(DATADIR + SAFE_IMG_PNG):
+        frame = cv2.imread(DATADIR + SAFE_IMG_PNG + file)
+        imageSafeList.append(frame)
+    for file in os.listdir(DATADIR + UNSAFE_IMG_PNG):
+         frame = cv2.imread(DATADIR + UNSAFE_IMG_PNG + file)
+         imageUnsafeList.append(frame)
+    
     
 
     #final list that stores the images
