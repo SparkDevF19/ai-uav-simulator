@@ -26,7 +26,7 @@ import tensorflow.keras as keras
 from tqdm import tqdm
 
 #Directory variables
-DATADIR = r"D:\\" # The directory to SAFE and UNSAFE PFM/PNG images
+DATADIR = r"C:\\Users\\JohnQ\Desktop\\git_repos\\ai-uav-simulator" # The directory to SAFE and UNSAFE PFM/PNG images
 STATES_PNG = ["Airsim_SafePNG", "Airsim_UnsafePNG"] #Sub-directories for png files
 SAFE_IMG_PNG = STATES_PNG[0] 
 UNSAFE_IMG_PNG = STATES_PNG[1]
@@ -80,11 +80,22 @@ def create_training_data():
             except Exception as e:  # in the interest in keeping the output clean...
                 pass
 
-    def CNN_trainer(IMAGE):
-        pickle_in = open("X.pickle","rb")
+    def CNN_trainer(input_df):
+        X = input_df.iloc[:,0]
+        y = input_df.iloc[:,1]
+
+        pickle_out = open("X.pickle", "wb")
+        pickle.dump(X,pickle_out)
+        pickle_out.close()
+
+        pickle_out = open("y.pickle", "wb")
+        pickle.dump(y,pickle_out)
+        pickle_out.close()
+
+        pickle_in = open("X.pickle", "rb")
         X = pickle.load(pickle_in)
 
-        pickle_in = open("y.pickle","rb")
+        pickle_in = open("y.pickle", "rb")
         y = pickle.load(pickle_in)
 
         X = X/255.0 #normalize
@@ -164,31 +175,6 @@ def buildDF():
 
         except Exception as e:
             continue
-
-    #final list that stores the images
-    images = imageSafeList.append(imageUnsafeList)
-    
-    
-
-    labels = []
-    for i in range(len(imageSafeList)):
-        labels.append("safe")
-    for u in range(len(imageUnsafeList)):
-        labels.append("unsafe")
-
-    # feed_dict = {images : labels}
-    # retPairs = feed_dict
-    # print(retPairs)
-
-    #used to search for specific index of a png
-    for i in range(len(images_df)):
-        #gives that 2.png is in index 5780
-        if(images_df.index[i] == '2.png'):
-            print(i)
-
-    #testing if that index actually holds the png file
-    print(images_df.index[5780])
-    return images_df
     
 
 images_df = buildDF()
