@@ -129,17 +129,27 @@ def main():
 
     #appends safe & unsafe images to the appropriate lists to later use as labels
 
-    for file in os.listdir(DATADIR + SAFE_IMG_PNG):
-        frame = cv2.imread(DATADIR + SAFE_IMG_PNG + file)
-        imageSafeList.append(frame)
-    for file in os.listdir(DATADIR + UNSAFE_IMG_PNG):
-         frame = cv2.imread(DATADIR + UNSAFE_IMG_PNG + file)
-         imageUnsafeList.append(frame)
-    
-    
+    for file in os.listdir(DATADIR + '\\' + SAFE_IMG_PNG):
+        try:
+            frame = cv2.imread(DATADIR + '\\' + SAFE_IMG_PNG + '\\' + file)
+            imageSafeList.append(frame)
+            frame = cv2.resize(frame, (50, 50))
 
+        except Exception as e:
+            print(str(e))
+    for file in os.listdir(DATADIR + '\\' + UNSAFE_IMG_PNG):
+        try:
+            frame = cv2.imread(DATADIR + '\\' + UNSAFE_IMG_PNG + '\\' + file)
+            imageUnsafeList.append(frame)
+    
+        except Exception as e:
+            print(str(e))
+    
+    print(imageSafeList)
     #final list that stores the images
     images = imageSafeList.append(imageUnsafeList)
+    
+    
 
     labels = []
     for i in range(len(imageSafeList)):
@@ -147,9 +157,9 @@ def main():
     for u in range(len(imageUnsafeList)):
         labels.append("unsafe")
 
-    feed_dict = {images : labels}
-    retPairs = feed_dict
-    print(retPairs)
+    # feed_dict = {images : labels}
+    # retPairs = feed_dict
+    # print(retPairs)
     
 
 main()
