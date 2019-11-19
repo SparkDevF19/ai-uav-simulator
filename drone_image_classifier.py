@@ -1,20 +1,30 @@
-'''This is not our work, we are simpliy modifying the CNN
-from https://pythonprogramming.net/introduction-deep-learning-python-tensorflow-keras/
-by: Harrison Kinsley'''
+"""
+IMAGE CLASSIFIER, DATAFRAME BUILDER & CNN Network
+--------------------------------------------------------------------------------------------------------------
+DESCRIPTION:
 
-#Carlos waz here
+--------------------------------------------------------------------------------------------------------------    
+MADE BY: 
+    Ivan A. Reyes
+    Ernest J. Quant
+    Orson Meyreles
+    John Quitto-Graham  
+    Carlos Valdes
+--------------------------------------------------------------------------------------------------------------
+"""
 
 import numpy as np
+import pandas as pd
 import pickle
 import matplotlib.pyplot as plt
 import os
 import cv2
 import tensorflow as tf
-import tensorflow.keras as keras 
+import tensorflow.python.keras as keras 
 from tqdm import tqdm
 
 #Directory variables
-DATADIR = "D:\\" # The directory to SAFE and UNSAFE PFM/PNG images
+DATADIR = r"C:\Users\ivanr\OneDrive\Documents\FIUCS\SparkDev\ai-uav-simulator" # The directory to SAFE and UNSAFE PFM/PNG images
 STATES_PNG = ["Airsim_SafePNG", "Airsim_UnsafePNG"] #Sub-directories for png files
 SAFE_IMG_PNG = STATES_PNG[0] 
 UNSAFE_IMG_PNG = STATES_PNG[1]
@@ -120,7 +130,7 @@ def create_training_data():
 
         model.save('CNN_tester.model')
 
-def main():
+def buildDF():
     dataToAR()
 
     #store safe/unsafe images into a list
@@ -128,22 +138,35 @@ def main():
     imageUnsafeList = []
 
     #appends safe & unsafe images to the appropriate lists to later use as labels
-
+    imageSafeList = pd.Series()
+    imageUnsafeList = pd.Series()
+    images_df = pd.DataFrame(columns=["Data", "Condition"])
+    i = 0 #DELETE
+    
     for file in os.listdir(DATADIR + '\\' + SAFE_IMG_PNG):
         try:
-            frame = cv2.imread(DATADIR + '\\' + SAFE_IMG_PNG + '\\' + file)
-            imageSafeList.append(frame)
-            frame = cv2.resize(frame, (50, 50))
+            if i <= 10:
+                frame = cv2.imread(DATADIR + '\\' + SAFE_IMG_PNG + '\\' + file)
+                frame = cv2.resize(frame, (50, 50))
+                images_df.loc[file] = [frame, "Safe"]
+            else:
+                break
+            i += 1
         except Exception as e:
             print(str(e))
+    i = 0 #DELETE
     for file in os.listdir(DATADIR + '\\' + UNSAFE_IMG_PNG):
         try:
-            frame = cv2.imread(DATADIR + '\\' + UNSAFE_IMG_PNG + '\\' + file)
-            imageUnsafeList.append(frame)
+            if i <= 10:
+                frame = cv2.imread(DATADIR + '\\' + UNSAFE_IMG_PNG + '\\' + file)
+                frame = cv2.resize(frame, (50, 50))
+                images_df.loc[file] = [frame, "Unsafe"]
+            else:
+                break
+            i += 1
         except Exception as e:
             print(str(e))
-    
-    print(imageSafeList)
+
     #final list that stores the images
     images = imageSafeList.append(imageUnsafeList)
     
@@ -158,8 +181,15 @@ def main():
     # feed_dict = {images : labels}
     # retPairs = feed_dict
     # print(retPairs)
+    return images_df
     
 
-main()
+images_df = buildDF()
 # Where we'll store weights and biases
 PARAMFILE = 'params.pkl'
+
+'''
+CNN adapter from:
+from https://pythonprogramming.net/introduction-deep-learning-python-tensorflow-keras/
+by: Harrison Kinsley
+'''
