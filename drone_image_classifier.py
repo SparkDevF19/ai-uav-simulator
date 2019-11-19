@@ -26,7 +26,7 @@ import tensorflow.keras as keras
 from tqdm import tqdm
 
 #Directory variables
-DATADIR = r"C:\\Users\\JohnQ\Desktop\\git_repos\\ai-uav-simulator" # The directory to SAFE and UNSAFE PFM/PNG images
+DATADIR = r".\\git_repos\\ai-uav-simulator" # The directory to SAFE and UNSAFE PFM/PNG images
 STATES_PNG = ["Airsim_SafePNG", "Airsim_UnsafePNG"] #Sub-directories for png files
 SAFE_IMG_PNG = STATES_PNG[0] 
 UNSAFE_IMG_PNG = STATES_PNG[1]
@@ -40,8 +40,6 @@ def dataToAR():
 
         for img in os.listdir(path_PNG):  # iterate over each image
             img_ArrayPNG = cv2.imread(os.path.join(path_PNG,img) ,cv2.IMREAD_GRAYSCALE)  # convert to array
-            '''plt.imshow(img_array, cmap='gray')  # graph it
-            plt.show()  # display!'''
             break  # we just want one for now so break
         break  #...and one more!
 
@@ -146,10 +144,6 @@ def create_training_data():
 def buildDF():
     dataToAR()
 
-    #store safe/unsafe images into a list
-    imageSafeList = []
-    imageUnsafeList = []
-
     #appends safe & unsafe images to the appropriate lists to later use as labels
     imageSafeList = pd.Series()
     imageUnsafeList = pd.Series()
@@ -168,16 +162,21 @@ def buildDF():
 
     for file in os.listdir(DATADIR + '\\' + UNSAFE_IMG_PNG):
         try:
-
             frame = cv2.imread(DATADIR + '\\' + UNSAFE_IMG_PNG + '\\' + file)
             frame = cv2.resize(frame, (50, 50))
             images_df.loc[file] = [frame, "Unsafe"]
 
         except Exception as e:
             continue
-    
 
-images_df = buildDF()
+    return images_df
+
+def main():
+    #Here we are building a dataframe of our images and their labels
+    images_df = buildDF()
+    #invoke the network
+    CNN_trainer(images_df)
+
 # Where we'll store weights and biases
 PARAMFILE = 'params.pkl'
 
