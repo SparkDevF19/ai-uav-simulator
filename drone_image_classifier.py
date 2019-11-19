@@ -2,6 +2,8 @@
 from https://pythonprogramming.net/introduction-deep-learning-python-tensorflow-keras/
 by: Harrison Kinsley'''
 
+#Carlos waz here
+
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
@@ -38,6 +40,7 @@ def dataToAR():
             break  # we just want one for now so break
         break  #...and one more!
 
+        #Same as above, but for PMF
     for state in STATES_PFM:
         path_PFM = os.path.join(DATADIR, state)
 
@@ -142,21 +145,19 @@ def main():
 
     #appends safe & unsafe images to the appropriate lists to later use as labels
     if (image_Type):
-        for file in os.listdir(SAFE_IMG_PNG):
-                frame = loadgray(DATADIR + SAFE_IMG_PNG + file)
-                imageSafeList.append(file)
-        for file in os.listdir(UNSAFE_IMG_PNG):
-                frame = loadgray(DATADIR + UNSAFE_IMG_PNG + file)
-                imageUnsafeList.append(file)
+        for file in os.listdir(DATADIR + SAFE_IMG_PNG):
+                frame = cv2.imread(DATADIR + SAFE_IMG_PNG + file)
+                imageSafeList.append(frame)
+        for file in os.listdir(DATADIR + UNSAFE_IMG_PNG):
+                frame = cv2.imread(DATADIR + UNSAFE_IMG_PNG + file)
+                imageUnsafeList.append(frame)
     elif(not(image_Type)):
-        for file in os.listdir(SAFE_IMG_PFM):
-            frame = loadgray(DATADIR + SAFE_IMG_PFM+ file)
-            imageSafeList.append(file)
-        for file in os.listdir(UNSAFE_IMG_PFM):
-            frame = loadgray(DATADIR + UNSAFE_IMG_PFM + file)
-            imageUnsafeList.append(file)
-
-    #store unsafe images into a list
+        for file in os.listdir(DATADIR + SAFE_IMG_PFM):
+            frame = cv2.imread(DATADIR + SAFE_IMG_PFM+ file)
+            imageSafeList.append(frame)
+        for file in os.listdir(DATADIR + UNSAFE_IMG_PFM):
+            frame = cv2.imread(DATADIR + UNSAFE_IMG_PFM + file)
+            imageUnsafeList.append(frame)
     
 
     #final list that stores the images
@@ -168,8 +169,10 @@ def main():
     for u in range(len(imageUnsafeList)):
         labels.append("unsafe")
 
-    retPairs = feed_dict = {images, labels}
+    feed_dict = {images : labels}
+    retPairs = feed_dict
     print(retPairs)
+    
 
 main()
 # Where we'll store weights and biases
