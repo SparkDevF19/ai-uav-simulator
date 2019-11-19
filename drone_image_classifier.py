@@ -134,14 +134,12 @@ def main():
             frame = cv2.imread(DATADIR + '\\' + SAFE_IMG_PNG + '\\' + file)
             imageSafeList.append(frame)
             frame = cv2.resize(frame, (50, 50))
-
         except Exception as e:
             print(str(e))
     for file in os.listdir(DATADIR + '\\' + UNSAFE_IMG_PNG):
         try:
             frame = cv2.imread(DATADIR + '\\' + UNSAFE_IMG_PNG + '\\' + file)
             imageUnsafeList.append(frame)
-    
         except Exception as e:
             print(str(e))
     
