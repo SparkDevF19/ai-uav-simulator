@@ -10,6 +10,8 @@ MADE BY:
     Orson Meyreles
     John Quitto-Graham  
     Carlos Valdes
+    Catherine Angelini
+    Marcial Barrios 
 --------------------------------------------------------------------------------------------------------------
 """
 
@@ -20,11 +22,11 @@ import matplotlib.pyplot as plt
 import os
 import cv2
 import tensorflow as tf
-import tensorflow.python.keras as keras 
+import tensorflow.keras as keras 
 from tqdm import tqdm
 
 #Directory variables
-DATADIR = r"C:\Users\ivanr\OneDrive\Documents\FIUCS\SparkDev\ai-uav-simulator" # The directory to SAFE and UNSAFE PFM/PNG images
+DATADIR = r"D:\\" # The directory to SAFE and UNSAFE PFM/PNG images
 STATES_PNG = ["Airsim_SafePNG", "Airsim_UnsafePNG"] #Sub-directories for png files
 SAFE_IMG_PNG = STATES_PNG[0] 
 UNSAFE_IMG_PNG = STATES_PNG[1]
@@ -140,32 +142,28 @@ def buildDF():
     #appends safe & unsafe images to the appropriate lists to later use as labels
     imageSafeList = pd.Series()
     imageUnsafeList = pd.Series()
-    images_df = pd.DataFrame(columns=["Data", "Condition"])
-    i = 0 #DELETE
+    images_df = pd.DataFrame(columns=["image_Data", "State"])
+    
     
     for file in os.listdir(DATADIR + '\\' + SAFE_IMG_PNG):
         try:
-            if i <= 10:
-                frame = cv2.imread(DATADIR + '\\' + SAFE_IMG_PNG + '\\' + file)
-                frame = cv2.resize(frame, (50, 50))
-                images_df.loc[file] = [frame, "Safe"]
-            else:
-                break
-            i += 1
+            
+            frame = cv2.imread(DATADIR + '\\' + SAFE_IMG_PNG + '\\' + file)
+            frame = cv2.resize(frame, (50, 50))
+            images_df.loc[file] = [frame, "Safe"]
+    
         except Exception as e:
-            print(str(e))
-    i = 0 #DELETE
+            continue
+
     for file in os.listdir(DATADIR + '\\' + UNSAFE_IMG_PNG):
         try:
-            if i <= 10:
-                frame = cv2.imread(DATADIR + '\\' + UNSAFE_IMG_PNG + '\\' + file)
-                frame = cv2.resize(frame, (50, 50))
-                images_df.loc[file] = [frame, "Unsafe"]
-            else:
-                break
-            i += 1
+
+            frame = cv2.imread(DATADIR + '\\' + UNSAFE_IMG_PNG + '\\' + file)
+            frame = cv2.resize(frame, (50, 50))
+            images_df.loc[file] = [frame, "Unsafe"]
+
         except Exception as e:
-            print(str(e))
+            continue
 
     #final list that stores the images
     images = imageSafeList.append(imageUnsafeList)
@@ -181,6 +179,15 @@ def buildDF():
     # feed_dict = {images : labels}
     # retPairs = feed_dict
     # print(retPairs)
+
+    #used to search for specific index of a png
+    for i in range(len(images_df)):
+        #gives that 2.png is in index 5780
+        if(images_df.index[i] == '2.png'):
+            print(i)
+
+    #testing if that index actually holds the png file
+    print(images_df.index[5780])
     return images_df
     
 
