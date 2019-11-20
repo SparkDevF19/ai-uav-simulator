@@ -1,14 +1,17 @@
 
 """
 AUTHORS:
-Ernest J. Quant
-John Quitto
-Orson Meyreles
-Ivan A. Reyes
+    Ernest J. Quant
+    Ivan A. Reyes
+    Orson Meyreles
+    John Quitto-Graham
+    Carlos Valdes
+    Maria Celeste Carbonell
 """
-
+from mpl_toolkits.mplot3d import Axes3D
 from queue import PriorityQueue
 from airsim import *
+import matplotlib.pyplot as plt
 import setup_path
 import airsim
 import math
@@ -32,15 +35,33 @@ class Node:
         return self.parent
 
 
-def returnPath(lastNode):
+def printPathAndGraph(lastNode):
 
-    visited = []
+    path = []
+    xCords = []
+    yCords = []
+    zCords = []
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
     while lastNode.parent != None:
         x,y = lastNode.getCargo()
-        visited.insert(0,(x,y))
+        xCords.insert(0,x)
+        yCords.insert(0,y)
+        zCords.insert(0,-1)
+        path.insert(0,(x,y))
         lastNode = lastNode.parent
 
-    return(visited)
+    ax.scatter(x, y, z, c='r', marker='o')
+
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+
+    plt.show()
+    print(path)
+
 
 def graphPath():
     
