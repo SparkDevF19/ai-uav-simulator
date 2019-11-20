@@ -17,6 +17,7 @@ MADE BY:
 
 import numpy as np
 import pandas as pd
+from random import choice
 import pickle
 import matplotlib.pyplot as plt
 import os
@@ -176,10 +177,46 @@ def buildDF():
 
     return images_df
 
+def ProduceSampleData(df, condition: int ): #0 for Safe, 1 for Unsafe
+
+    '''
+    Returns a list with samples of either Safe (0) or Unsafe (1) images 
+    contained as numpy arrays. The number of samples contained in the list
+    is equal to 10% (rounded) of the total amount of images in the dataframe
+    '''
+    numSafeSamples = int(len(df)*0.10/2)
+    safeImages = df[df['State'] == "Safe"]
+    lenSafeSamples = len(safeImages)
+    safeSamples = []
+
+    numUnsafeSamples = int(len(df)*0.10/2)
+    UnsafeImages = df[df['State'] == "Unsafe"]
+    lenUnsafeSamples = len(UnsafeImages)
+    unsafeSamples = []
+
+    if condition == 0:
+        for num in range(numSafeSamples):
+            randomImage = random.randint(0,lenSafeSamples)
+            aSafeImage = safeImages.iloc[randomImage]
+            safeSamples.append(aSafeImage)
+        return safeSamples
+
+    elif condition == 1:
+        for num in range(numUnsafeSamples):
+            randomImage = random.randint(0,lenUnsafeSamples)
+            anUnsafeImage = unsafeImages.iloc[randomImage]
+            unsafeSamples.append(anUnsafeImage)
+        return unsafeSamples
+    
+
+
+
 def main():
     #Here we are building a dataframe of our images and their labels
     images_df = buildDF()
-    print(CNN_training(images_df))
+    print(ProduceSampleData(images_df,1))
+    #print(CNN_training(images_df))
+
 main()
 
 # Where we'll store weights and biases
