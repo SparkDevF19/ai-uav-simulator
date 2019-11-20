@@ -23,10 +23,14 @@ import os
 import cv2
 import tensorflow as tf
 import tensorflow.keras as keras 
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten
+from tensorflow.keras.layers import Conv2D, MaxPooling2D
 from tqdm import tqdm
 
 #Directory variables
-DATADIR = r".\\git_repos\\ai-uav-simulator" # The directory to SAFE and UNSAFE PFM/PNG images
+DATADIR = r"." # The directory to SAFE and UNSAFE PFM/PNG images
 STATES_PNG = ["Airsim_SafePNG", "Airsim_UnsafePNG"] #Sub-directories for png files
 SAFE_IMG_PNG = STATES_PNG[0] 
 UNSAFE_IMG_PNG = STATES_PNG[1]
@@ -78,71 +82,72 @@ def create_training_data():
             except Exception as e:  # in the interest in keeping the output clean...
                 pass
 
-    def CNN_trainer(input_df):
-        X = input_df.iloc[:,0]
-        y = input_df.iloc[:,1]
+def CNN_training(input_df):
+    X = input_df.as_matrix(columns=input_df.columns[0])
+    y = input_df.as_matrix(columns=input_df.columns[0])
 
-        pickle_out = open("X.pickle", "wb")
-        pickle.dump(X,pickle_out)
-        pickle_out.close()
+    pickle_out = open("X.pickle", "wb")
+    pickle.dump(X,pickle_out)
+    pickle_out.close()
 
-        pickle_out = open("y.pickle", "wb")
-        pickle.dump(y,pickle_out)
-        pickle_out.close()
+    pickle_out = open("y.pickle", "wb")
+    pickle.dump(y,pickle_out)
+    pickle_out.close()
 
-        pickle_in = open("X.pickle", "rb")
-        X = pickle.load(pickle_in)
+    pickle_in = open("X.pickle", "rb")
+    X = pickle.load(pickle_in)
 
-        pickle_in = open("y.pickle", "rb")
-        y = pickle.load(pickle_in)
+    pickle_in = open("y.pickle", "rb")
+    y = pickle.load(pickle_in)
 
-        X = X/255.0 #normalize
+    X = X/255.0 #normalize
+    
+    return X
+'''    dense_layers = [0]
+    layer_sizes = [64]
+    conv_layers = [1]
 
-        dense_layers = [0]
-        layer_sizes = [64]
-        conv_layers = [1]
+    for dense_layer in dense_layers:
+        for layer_size in layer_sizes:
+            for conv_layer in conv_layers:
+                NAME = "{}-conv-{}-nodes-{}-dense-{}".format(conv_layer, layer_size, dense_layer, int(time.time()))
+                print(NAME)
+                model = Sequential() #feed-forward network
+                model.add(Conv2D(layer_size, (3, 3), input_shape=X.shape[1:]))
+                model.add(Activation('relu'))
+                model.add(MaxPooling2D(pool_size=(2, 2)))
 
-        for dense_layer in dense_layers:
-            for layer_size in layer_sizes:
-                for conv_layer in conv_layers:
-                    NAME = "{}-conv-{}-nodes-{}-dense-{}".format(conv_layer, layer_size, dense_layer, int(time.time()))
-                    print(NAME)
-                    model = Sequential() #feed-forward network
-                    model.add(Conv2D(layer_size, (3, 3), input_shape=X.shape[1:]))
-                    model.add(Activation('relu'))
-                    model.add(MaxPooling2D(pool_size=(2, 2)))
+            for l in range(conv_layer-1):
+                model.add(Conv2D(layer_size, (3, 3)))
+                model.add(Activation('relu'))
+                model.add(MaxPooling2D(pool_size=(2, 2)))
 
-                for l in range(conv_layer-1):
-                    model.add(Conv2D(layer_size, (3, 3)))
-                    model.add(Activation('relu'))
-                    model.add(MaxPooling2D(pool_size=(2, 2)))
+            model.add(Flatten())
 
-                model.add(Flatten())
+            for _ in range(dense_layer):
+                model.add(Dense(layer_size))
+                model.add(Activation('relu'))
 
-                for _ in range(dense_layer):
-                    model.add(Dense(layer_size))
-                    model.add(Activation('relu'))
+            model.add(Dense(1))
+            model.add(Activation('sigmoid'))
 
-                model.add(Dense(1))
-                model.add(Activation('sigmoid'))
+            tensorboard = TensorBoard(log_dir="logs/{}".format(NAME))
 
-                tensorboard = TensorBoard(log_dir="logs/{}".format(NAME))
+            model.compile(loss='binary_crossentropy',
+                            optimizer='adam',
+                            metrics=['accuracy'],
+                            )
 
-                model.compile(loss='binary_crossentropy',
-                                optimizer='adam',
-                                metrics=['accuracy'],
-                                )
+            model.fit(X, y,
+                        batch_size=32,
+                        epochs=10,
+                        validation_split=0.1,
+                        callbacks=[tensorboard])
 
-                model.fit(X, y,
-                            batch_size=32,
-                            epochs=10,
-                            validation_split=0.1,
-                            callbacks=[tensorboard])
-
-        model.save('CNN_tester.model')
+    model.save('CNN_tester.model')'''
 
 def buildDF():
-    dataToAR()
+    #dataToAR()
 
     #appends safe & unsafe images to the appropriate lists to later use as labels
     imageSafeList = pd.Series()
@@ -174,8 +179,8 @@ def buildDF():
 def main():
     #Here we are building a dataframe of our images and their labels
     images_df = buildDF()
-    #invoke the network
-    CNN_trainer(images_df)
+    print(CNN_training(images_df))
+main()
 
 # Where we'll store weights and biases
 PARAMFILE = 'params.pkl'
