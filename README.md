@@ -1,5 +1,5 @@
-# ai-uav-simulator
-## Collision Image Collector
+# AI UAV Simulator
+## Collision Image Collection 
 ![](collision_image.gif)
 
 ## Project Poster
